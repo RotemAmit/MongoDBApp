@@ -33,15 +33,6 @@ public class MongoDB {
         MongoDB.MP3Collection = MongoDB.MongoProjectDB.getCollection("MP3");
     }
 
-    private static Double getDurationWithMp3Spi(File file) throws UnsupportedAudioFileException, IOException {
-        //File file = new File("filename.mp3");
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
-        AudioFormat format = audioInputStream.getFormat();
-        long frames = audioInputStream.getFrameLength();
-        double durationInSeconds = (frames+0.0) / format.getFrameRate();
-        return durationInSeconds;
-    }
-
     private static Document getDocument(MpFile mpFile){
         return new Document("ID", mpFile.getId())
                 .append("FileName", mpFile.getFileName())
@@ -61,10 +52,13 @@ public class MongoDB {
                     System.out.println(fileEntry.getName());
                     Path path = Paths.get("C:\\Users\\rotem amit\\Music\\" + fileEntry.getName());
                     long bytes = Files.size(path);
-                    System.out.printf("%,d bytes%n", bytes);
+                    long megaBytes = bytes/(1024 * 1024);
+                    long rest = bytes%(1024 * 1024);
+                    Double size = Double.parseDouble(megaBytes+"."+rest);
+                    System.out.println("megabytes:" + megaBytes+"."+rest);
                     //Double duration = getDurationWithMp3Spi(fileEntry);
                     //System.out.println("duration: " + duration);
-                    MpFile mpFile = new MpFile(fileName, bytes, null, null);
+                    MpFile mpFile = new MpFile(fileName, size, MpFile.getDuration((path.toString())), null);
                     mpFilesList.add(getDocument(mpFile));
                 }
 
