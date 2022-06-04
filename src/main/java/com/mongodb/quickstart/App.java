@@ -4,6 +4,7 @@ import org.bson.Document;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,8 +21,11 @@ public class App {
     private JTextField inputFolder;
     private JPanel panelTable;
     private JPanel panelBtn;
+    private JTable mpFilesTable;
+    private JScrollPane scrolPaneTable;
 
     public App() {
+        MongoDB.initializeMongoDb();
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -35,8 +39,28 @@ public class App {
                     throw new RuntimeException(ex);
                 }
                 MongoDB.insertManyDocuments(mpFileList);
+                createTable();
             }
         });
+    }
+
+    private Object[][] makeArr(ArrayList<ArrayList<Object>> dataList){
+        Object[][] data = new Object[dataList.size()-1][4];
+        for (int i = 0; i < data.length; i++) {
+            ArrayList<Object> temp = dataList.get(i);
+            temp.remove(0);
+            data [i] = temp.toArray();
+        }
+        return data;
+    }
+
+    private void createTable(){
+        ArrayList<ArrayList<Object>> dataList = MongoDB.getData();
+        Object[][] data = makeArr(dataList);
+        mpFilesTable.setModel(new DefaultTableModel(
+                data,
+                new String[]{"File Name", "Size", "Length", "Is Valid"}
+        ));
     }
 
     public static void main(String[] args) {
@@ -46,6 +70,5 @@ public class App {
         frame.setMinimumSize(new Dimension(450, 474));
         frame.pack();
         frame.setVisible(true);
-        MongoDB.initializeMongoDb();
     }
 }

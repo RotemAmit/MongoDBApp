@@ -14,8 +14,9 @@ public class Main {
 
 
 
-
-        MongoDB.printInfo();
+        MongoDB.initializeMongoDb();
+        ArrayList<ArrayList<Object>> list = MongoDB.getData();
+        System.out.println(list);
         MongoDB.deleteOne(1);
     }
 }

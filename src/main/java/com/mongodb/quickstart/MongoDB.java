@@ -6,6 +6,7 @@ import com.mongodb.client.model.InsertManyOptions;
 import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.json.JsonObject;
 
 import javax.sound.sampled.*;
 import java.io.File;
@@ -80,12 +81,26 @@ public class MongoDB {
         System.out.println("The new MP3 file list was inserted to the DB");
     }
 
-    public static void printInfo(){
+    public static ArrayList<ArrayList<Object>> getData(){
         FindIterable<Document> iterDoc = MP3Collection.find();
         MongoCursor<Document> cursor = iterDoc.iterator();
+        ArrayList<ArrayList<Object>> tableInfo = new ArrayList<>();
+        int tableIndex = 0;
         while (cursor.hasNext()) {
-            System.out.println(cursor.next().toJson());
+            String JSONString = cursor.next().toJson();
+            ArrayList<Object> temp = new ArrayList<>();
+            String[] splitJson = JSONString.split(",");
+            String[][] relevantSplit = new String[splitJson.length-1][2];
+            for (int i = 0; i < splitJson.length-1; i++) {
+                relevantSplit[i] = splitJson[i+1].split(":");
+            }
+            for (int i = 0; i < relevantSplit.length; i++) {
+                temp.add(relevantSplit[i][1].split("}")[0]);
+            }
+            tableInfo.add(temp);
+            tableIndex ++;
         }
+        return tableInfo;
     }
 
     public static void deleteOne(Integer id){
