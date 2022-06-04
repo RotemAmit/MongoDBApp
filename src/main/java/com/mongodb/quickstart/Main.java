@@ -17,6 +17,6 @@ public class Main {
         MongoDB.initializeMongoDb();
         ArrayList<ArrayList<Object>> list = MongoDB.getData();
         System.out.println(list);
-        MongoDB.deleteOne(1);
+        //MongoDB.deleteOne(1);
     }
 }

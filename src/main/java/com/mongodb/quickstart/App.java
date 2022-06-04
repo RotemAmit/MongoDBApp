@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class App {
-    private JButton button;
+    private JButton scanButton;
     private JPanel panelMain;
     private JLabel AppHeader;
     private JPanel InputLabelNContent;
@@ -23,10 +23,14 @@ public class App {
     private JPanel panelBtn;
     private JTable mpFilesTable;
     private JScrollPane scrolPaneTable;
+    private JButton updateBtn;
+
+    private DefaultTableModel model;
+    private ArrayList<ArrayList<Object>> dataList;
 
     public App() {
         MongoDB.initializeMongoDb();
-        button.addActionListener(new ActionListener() {
+        scanButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //JOptionPane.showMessageDialog(null, "Hello World!");
@@ -42,25 +46,89 @@ public class App {
                 createTable();
             }
         });
+        updateBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for (int i = 0; i < mpFilesTable.getRowCount(); i++) {
+                    Boolean checked = Boolean.valueOf(mpFilesTable.getValueAt(i,3).toString());
+                    //update DB
+                    Integer updateId = checkUpdate(checked, i);
+                    if (updateId != -1){
+                        MongoDB.updateOne(updateId, checked);
+                        updateDataList(checked, i);
+                    }
+                }
+            }
+        });
     }
 
-    private Object[][] makeArr(ArrayList<ArrayList<Object>> dataList){
-        Object[][] data = new Object[dataList.size()-1][4];
-        for (int i = 0; i < data.length; i++) {
-            ArrayList<Object> temp = dataList.get(i);
-            temp.remove(0);
-            data [i] = temp.toArray();
+    private void updateDataList(Boolean checked, int row){
+        ArrayList<Object> arr = dataList.get(row);
+        ArrayList<Object> newArr = new ArrayList<>();
+        newArr.add(arr.get(0));
+        newArr.add(arr.get(1));
+        newArr.add(arr.get(2));
+        newArr.add(arr.get(3));
+        newArr.add(checked);
+        dataList.remove(row);
+        dataList.add(row, newArr);
+    }
+
+    private Integer checkUpdate(Boolean checked, int row){
+        ArrayList<Object> rowObj = dataList.get(row);
+        String val = rowObj.get(4).toString();
+        if ((val.compareTo("null") == 0) || ((val.compareTo("true") == 0) && !checked) || ((val.compareTo("false") == 0) && checked)){
+            return Integer.parseInt(rowObj.get(0).toString());
         }
-        return data;
+        else{
+            return -1;
+        }
     }
 
+    private void addColumns(){
+        model.addColumn("File Name");
+        model.addColumn("Size");
+        model.addColumn("Length");
+        model.addColumn("Is Valid");
+    }
+
+    private void addRows(){
+        for (int i = 0; i < dataList.size(); i++) {
+            ArrayList<Object> rowObj = dataList.get(i);
+            model.addRow(new Object[0]);
+            model.setValueAt(rowObj.get(1),i, 0);
+            model.setValueAt(rowObj.get(2),i, 1);
+            model.setValueAt(rowObj.get(3),i, 2);
+            if (rowObj.get(4).toString().compareTo("true") == 0){
+                model.setValueAt(true,i,3);
+            }
+            else {
+                model.setValueAt(false,i,3);
+            }
+        }
+    }
     private void createTable(){
-        ArrayList<ArrayList<Object>> dataList = MongoDB.getData();
-        Object[][] data = makeArr(dataList);
-        mpFilesTable.setModel(new DefaultTableModel(
-                data,
-                new String[]{"File Name", "Size", "Length", "Is Valid"}
-        ));
+        dataList = MongoDB.getData();
+        model = new DefaultTableModel(){
+            public Class<?> getColumnClass(int column){
+                switch (column){
+                    case 0:
+                        return String.class;
+                    case 1:
+                        return String.class;
+                    case 2:
+                        return String.class;
+                    case 3:
+                        return Boolean.class;
+                    default:
+                        return String.class;
+                }
+            }
+        };
+
+        mpFilesTable.setModel(model);
+        addColumns();
+        addRows();
     }
 
     public static void main(String[] args) {

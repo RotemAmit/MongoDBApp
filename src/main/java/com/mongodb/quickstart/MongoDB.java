@@ -4,6 +4,7 @@ import com.mongodb.ConnectionString;
 import com.mongodb.client.*;
 import com.mongodb.client.model.InsertManyOptions;
 import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonObject;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.set;
 
 public class MongoDB {
     public static MongoClient mongoClient;
@@ -85,7 +87,6 @@ public class MongoDB {
         FindIterable<Document> iterDoc = MP3Collection.find();
         MongoCursor<Document> cursor = iterDoc.iterator();
         ArrayList<ArrayList<Object>> tableInfo = new ArrayList<>();
-        int tableIndex = 0;
         while (cursor.hasNext()) {
             String JSONString = cursor.next().toJson();
             ArrayList<Object> temp = new ArrayList<>();
@@ -95,10 +96,9 @@ public class MongoDB {
                 relevantSplit[i] = splitJson[i+1].split(":");
             }
             for (int i = 0; i < relevantSplit.length; i++) {
-                temp.add(relevantSplit[i][1].split("}")[0]);
+                temp.add(relevantSplit[i][1].split("}")[0].replaceAll("\\s", ""));
             }
             tableInfo.add(temp);
-            tableIndex ++;
         }
         return tableInfo;
     }
@@ -107,5 +107,12 @@ public class MongoDB {
         Bson filter = eq("ID", id);
         DeleteResult result = MP3Collection.deleteOne(filter);
         System.out.println(result);
+    }
+
+    public static void updateOne(Integer id, Boolean isValid){
+        Bson filter = eq("ID", id);
+        Bson updateOperation = set("IsValid", isValid);
+        UpdateResult updateResult = MP3Collection.updateOne(filter, updateOperation);
+        System.out.println("=> Updating the doc with {\"id\"}. changing isValid.");
     }
 }
