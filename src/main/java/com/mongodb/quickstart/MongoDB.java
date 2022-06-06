@@ -103,10 +103,11 @@ public class MongoDB {
         System.out.println(result);
     }
 
-    public static void updateOne(Integer id, Boolean isValid){
+    public static boolean updateOne(Integer id, Boolean isValid){
         Bson filter = eq("ID", id);
         Bson updateOperation = set("IsValid", isValid);
         UpdateResult updateResult = MP3Collection.updateOne(filter, updateOperation);
-        System.out.println("=> Updating the doc with {\"id\"}. changing isValid.");
+        System.out.println("=> Updating the doc with id "+ id +". changing isValid.");
+        return updateResult.getModifiedCount() == 1;
     }
 }

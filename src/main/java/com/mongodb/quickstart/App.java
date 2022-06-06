@@ -33,13 +33,13 @@ public class App {
         scanButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //JOptionPane.showMessageDialog(null, "Hello World!");
                 String folderPath = inputFolder.getText();
                 final File folder = new File(folderPath);
                 ArrayList<Document> mpFileList = null;
                 try {
                     mpFileList = MongoDB.listFilesForFolder(folder);
                 } catch (IOException | UnsupportedAudioFileException ex) {
+                    JOptionPane.showMessageDialog(null,"There was a problem entering the data to the DB");
                     throw new RuntimeException(ex);
                 }
                 MongoDB.insertManyDocuments(mpFileList);
@@ -49,14 +49,20 @@ public class App {
         updateBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                boolean isUpdated = true;
                 for (int i = 0; i < mpFilesTable.getRowCount(); i++) {
                     Boolean checked = Boolean.valueOf(mpFilesTable.getValueAt(i,3).toString());
-                    //update DB
                     Integer updateId = checkUpdate(checked, i);
                     if (updateId != -1){
-                        MongoDB.updateOne(updateId, checked);
+                        isUpdated = isUpdated && MongoDB.updateOne(updateId, checked);
                         updateDataList(checked, i);
                     }
+                }
+                if (isUpdated){
+                    JOptionPane.showMessageDialog(null,"The update was successful");
+                }
+                else {
+                    JOptionPane.showMessageDialog(null,"The update failed");
                 }
             }
         });
