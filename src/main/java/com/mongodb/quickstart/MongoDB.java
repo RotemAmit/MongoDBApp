@@ -56,8 +56,6 @@ public class MongoDB {
                     long rest = bytes%(1024 * 1024);
                     Double size = Double.parseDouble(megaBytes+"."+rest);
                     System.out.println("megabytes:" + megaBytes+"."+rest);
-                    //Double duration = getDurationWithMp3Spi(fileEntry);
-                    //System.out.println("duration: " + duration);
                     MpFile mpFile = new MpFile(fileName, size, MpFile.getDuration((path.toString())), null);
                     mpFilesList.add(getDocument(mpFile));
                 }
@@ -67,31 +65,17 @@ public class MongoDB {
         return mpFilesList;
     }
 
-    public static void insertOneDocument(Document document) {
-        MP3Collection.insertOne(document);
-        System.out.println("The new MP3 file was inserted to the DB");
-    }
-
     public static void insertManyDocuments(ArrayList<Document> list){
         MP3Collection.insertMany(list, new InsertManyOptions().ordered(false));
         System.out.println("The new MP3 file list was inserted to the DB");
     }
 
-    public static ArrayList<ArrayList<Object>> getData(){
-        FindIterable<Document> iterDoc = MP3Collection.find();
-        MongoCursor<Document> cursor = iterDoc.iterator();
+    public static ArrayList<ArrayList<Object>> getData(ArrayList<Document> docs){
         ArrayList<ArrayList<Object>> tableInfo = new ArrayList<>();
-        while (cursor.hasNext()) {
-            String JSONString = cursor.next().toJson();
+        for (int i = 0; i < docs.size(); i++) {
             ArrayList<Object> temp = new ArrayList<>();
-            String[] splitJson = JSONString.split(",");
-            String[][] relevantSplit = new String[splitJson.length-1][2];
-            for (int i = 0; i < splitJson.length-1; i++) {
-                relevantSplit[i] = splitJson[i+1].split(":");
-            }
-            for (int i = 0; i < relevantSplit.length; i++) {
-                temp.add(relevantSplit[i][1].split("}")[0].replaceAll("\\s", ""));
-            }
+            Document d = docs.get(i);
+            temp.addAll(d.values());
             tableInfo.add(temp);
         }
         return tableInfo;

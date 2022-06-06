@@ -26,7 +26,7 @@ public class App {
     private JButton updateBtn;
 
     private DefaultTableModel model;
-    private ArrayList<ArrayList<Object>> dataList;
+    private ArrayList<ArrayList<Object>> dataList = new ArrayList<>();
 
     public App() {
         MongoDB.initializeMongoDb();
@@ -38,6 +38,8 @@ public class App {
                 ArrayList<Document> mpFileList = null;
                 try {
                     mpFileList = MongoDB.listFilesForFolder(folder);
+                    ArrayList<ArrayList<Object>> list = MongoDB.getData(mpFileList);
+                    dataList.addAll(list);
                 } catch (IOException | UnsupportedAudioFileException ex) {
                     JOptionPane.showMessageDialog(null,"There was a problem entering the data to the DB");
                     throw new RuntimeException(ex);
@@ -82,13 +84,18 @@ public class App {
 
     private Integer checkUpdate(Boolean checked, int row){
         ArrayList<Object> rowObj = dataList.get(row);
-        String val = rowObj.get(4).toString();
-        if ((val.compareTo("null") == 0) || ((val.compareTo("true") == 0) && !checked) || ((val.compareTo("false") == 0) && checked)){
-            return Integer.parseInt(rowObj.get(0).toString());
+        if (rowObj.get(4) == null){
+            if (checked){
+                return Integer.parseInt(rowObj.get(0).toString());
+            }
         }
-        else{
-            return -1;
+        else {
+            String val = rowObj.get(4).toString();
+            if (((val.compareTo("true") == 0) && !checked) || ((val.compareTo("false") == 0) && checked)){
+                return Integer.parseInt(rowObj.get(0).toString());
+            }
         }
+        return -1;
     }
 
     private void addColumns(){
@@ -105,16 +112,15 @@ public class App {
             model.setValueAt(rowObj.get(1),i, 0);
             model.setValueAt(rowObj.get(2),i, 1);
             model.setValueAt(rowObj.get(3),i, 2);
-            if (rowObj.get(4).toString().compareTo("true") == 0){
-                model.setValueAt(true,i,3);
+            if (rowObj.get(4) == null || rowObj.get(4).toString().compareTo("false") == 0){
+                model.setValueAt(false,i,3);
             }
             else {
-                model.setValueAt(false,i,3);
+                model.setValueAt(true,i,3);
             }
         }
     }
     private void createTable(){
-        dataList = MongoDB.getData();
         model = new DefaultTableModel(){
             public Class<?> getColumnClass(int column){
                 switch (column){
