@@ -40,29 +40,33 @@ public class MongoDB {
                 .append("Length", mpFile.getLength())
                 .append("IsValid", mpFile.getValid());
     }
-    public static ArrayList<Document> listFilesForFolder(final File folder) throws IOException, UnsupportedAudioFileException {
+    public static ArrayList<Document> listFilesForFolder(final File folder) {
         ArrayList<Document> mpFilesList = new ArrayList<>();
-        for (final File fileEntry : folder.listFiles()) {
-            if (fileEntry.isDirectory()) {
-                listFilesForFolder(fileEntry);
-            } else{
-                String end = ".mp3";
-                String fileName = fileEntry.getName();
-                if (fileName.contains(end)){
-                    System.out.println(fileEntry.getName());
-                    Path path = Paths.get("C:\\Users\\rotem amit\\Music\\" + fileEntry.getName());
-                    long bytes = Files.size(path);
-                    long megaBytes = bytes/(1024 * 1024);
-                    long rest = bytes%(1024 * 1024);
-                    Double size = Double.parseDouble(megaBytes+"."+rest);
-                    System.out.println("megabytes:" + megaBytes+"."+rest);
-                    MpFile mpFile = new MpFile(fileName, size, MpFile.getDuration((path.toString())), null);
-                    mpFilesList.add(getDocument(mpFile));
+        try {
+            for (final File fileEntry : folder.listFiles()) {
+                if (fileEntry.isDirectory()) {
+                    listFilesForFolder(fileEntry);
+                } else{
+                    String end = ".mp3";
+                    String fileName = fileEntry.getName();
+                    if (fileName.contains(end)){
+                        System.out.println(fileEntry.getName());
+                        Path path = Paths.get("C:\\Users\\rotem amit\\Music\\" + fileEntry.getName());
+                        long bytes = Files.size(path);
+                        long megaBytes = bytes/(1024 * 1024);
+                        long rest = bytes%(1024 * 1024);
+                        Double size = Double.parseDouble(megaBytes+"."+rest);
+                        System.out.println("megabytes:" + megaBytes+"."+rest);
+                        MpFile mpFile = new MpFile(fileName, size, MpFile.getDuration((path.toString())), null);
+                        mpFilesList.add(getDocument(mpFile));
+                    }
                 }
-
             }
+            return mpFilesList;
         }
-        return mpFilesList;
+        catch (NullPointerException | UnsupportedAudioFileException | IOException e){
+            return null;
+        }
     }
 
     public static void insertManyDocuments(ArrayList<Document> list){

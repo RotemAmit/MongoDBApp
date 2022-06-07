@@ -36,14 +36,13 @@ public class App {
                 String folderPath = inputFolder.getText();
                 final File folder = new File(folderPath);
                 ArrayList<Document> mpFileList = null;
-                try {
-                    mpFileList = MongoDB.listFilesForFolder(folder);
-                    ArrayList<ArrayList<Object>> list = MongoDB.getData(mpFileList);
-                    dataList.addAll(list);
-                } catch (IOException | UnsupportedAudioFileException ex) {
-                    JOptionPane.showMessageDialog(null,"There was a problem entering the data to the DB");
-                    throw new RuntimeException(ex);
+                mpFileList = MongoDB.listFilesForFolder(folder);
+                if (mpFileList == null){
+                    JOptionPane.showMessageDialog(null,"The scan of the folder failed. please try again");
+                    return;
                 }
+                ArrayList<ArrayList<Object>> list = MongoDB.getData(mpFileList);
+                dataList.addAll(list);
                 MongoDB.insertManyDocuments(mpFileList);
                 createTable();
             }
