@@ -44,14 +44,12 @@ public class MongoDB {
         ArrayList<Document> mpFilesList = new ArrayList<>();
         try {
             for (final File fileEntry : folder.listFiles()) {
-                if (fileEntry.isDirectory()) {
-                    listFilesForFolder(fileEntry);
-                } else{
+                if (!fileEntry.isDirectory()) {
                     String end = ".mp3";
                     String fileName = fileEntry.getName();
                     if (fileName.contains(end)){
                         System.out.println(fileEntry.getName());
-                        Path path = Paths.get("C:\\Users\\rotem amit\\Music\\" + fileEntry.getName());
+                        Path path = Paths.get(folder.getPath()+ "\\" + fileEntry.getName());
                         long bytes = Files.size(path);
                         long megaBytes = bytes/(1024 * 1024);
                         long rest = bytes%(1024 * 1024);

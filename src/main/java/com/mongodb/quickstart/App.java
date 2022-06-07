@@ -35,16 +35,18 @@ public class App {
             public void actionPerformed(ActionEvent e) {
                 String folderPath = inputFolder.getText();
                 final File folder = new File(folderPath);
-                ArrayList<Document> mpFileList = null;
-                mpFileList = MongoDB.listFilesForFolder(folder);
+                ArrayList<Document> mpFileList = MongoDB.listFilesForFolder(folder);
                 if (mpFileList == null){
                     JOptionPane.showMessageDialog(null,"The scan of the folder failed. please try again");
                     return;
                 }
                 ArrayList<ArrayList<Object>> list = MongoDB.getData(mpFileList);
-                dataList.addAll(list);
-                MongoDB.insertManyDocuments(mpFileList);
-                createTable();
+                if (mpFileList.size() > 0){
+                    dataList.addAll(list);
+                    MongoDB.insertManyDocuments(mpFileList);
+                    createTable();
+                }
+                JOptionPane.showMessageDialog(null,"The scan was successful");
             }
         });
         updateBtn.addActionListener(new ActionListener() {
