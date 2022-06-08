@@ -27,7 +27,7 @@ public class MongoDB {
     public static MongoCollection<Document> MP3Collection;
 
     public static void initializeMongoDb(){
-        ConnectionString connectionString = new ConnectionString("mongodb+srv://MongoRotem:raj5BNGXXKcKOzUE@cluster0.9wrug.mongodb.net/?retryWrites=true&w=majority");
+        ConnectionString connectionString = new ConnectionString("mongodb+srv://<userName>:<password>@cluster0.9wrug.mongodb.net/?retryWrites=true&w=majority");
         MongoDB.mongoClient = MongoClients.create(connectionString);
         MongoDB.MongoProjectDB = MongoDB.mongoClient.getDatabase("MongoProject");
         MongoDB.MP3Collection = MongoDB.MongoProjectDB.getCollection("MP3");
